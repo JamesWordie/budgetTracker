@@ -1,6 +1,5 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import {
   IUser,
   IUserMethods,

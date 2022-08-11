@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { BadRequestError, UnauthenticatedError } from "../errors";
+import { UnauthenticatedError } from "../errors";
 import { validateUser } from "../services/user.services";
 import {
   createSession,
@@ -35,7 +35,7 @@ const createUserSession = async (req: Request, res: Response) => {
   return res.status(StatusCodes.OK).json({ accessToken, refreshToken });
 };
 
-export const invalidateUserSession = async (req: Request, res: Response) => {
+const invalidateUserSession = async (req: Request, res: Response) => {
   const sessionId = get(req, "userData.session");
 
   await updateSession({ _id: sessionId }, { valid: false });
@@ -43,12 +43,12 @@ export const invalidateUserSession = async (req: Request, res: Response) => {
   return res.sendStatus(StatusCodes.NO_CONTENT);
 };
 
-export { createUserSession };
-
-export const getAllUserSessions = async (req: Request, res: Response) => {
+const getAllUserSessions = async (req: Request, res: Response) => {
   const userId = get(req, "userData.user._id");
 
   const sessions = await findSessions({ user: userId, valid: true });
 
   return res.status(StatusCodes.OK).json({ sessions });
 };
+
+export { createUserSession, invalidateUserSession, getAllUserSessions };

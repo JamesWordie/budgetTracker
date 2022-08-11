@@ -4,16 +4,17 @@ import {
   createUserSession,
   invalidateUserSession,
 } from "../controllers/session.controller";
-import requireUser from "../middleware/requireUser";
+import { requiresUserMiddleware } from "../middleware";
+
 const router = Router();
 
 // Get all User Sessions
-router.get("/", requireUser, getAllUserSessions);
+router.get("/", requiresUserMiddleware, getAllUserSessions);
 
 // Create a Session
 router.post("/", createUserSession);
 
 // Logout a User/Delete a Session
-router.delete("/", requireUser, invalidateUserSession);
+router.delete("/", requiresUserMiddleware, invalidateUserSession);
 
 export default router;

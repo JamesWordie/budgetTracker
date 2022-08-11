@@ -7,6 +7,7 @@ import User from "../models/user.model";
 import { IUser } from "../interfaces/exports.interfaces";
 import { FilterQuery, UpdateQuery } from "mongoose";
 import { BadRequestError } from "../errors";
+import log from "../logger";
 
 export const createSession = async (userId: string, userAgent: string) => {
   const session = await Session.create({ user: userId, userAgent });
@@ -78,6 +79,7 @@ export const findSessions = async (query: FilterQuery<ISession>) => {
   try {
     return Session.find(query);
   } catch (error: any) {
+    log.error(error);
     throw new BadRequestError(error.message);
   }
 };

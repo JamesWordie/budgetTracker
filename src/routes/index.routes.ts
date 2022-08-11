@@ -1,8 +1,7 @@
 import { Express, Request, Response } from "express";
 import userRouter from "./user.routes";
 import sessionRouter from "./session.routes";
-import destinationRouter from "./destination.js";
-import authenticateUser from "../middleware/authentication.js";
+import expenseRouter from "./expense.routes";
 
 export default function (app: Express) {
   app.get("/healthcheck", (req: Request, res: Response) => {
@@ -15,6 +14,6 @@ export default function (app: Express) {
   // Login A User (Session's)
   app.use("/api/v1/sessions", sessionRouter);
 
-  // Destination
-  //   app.use("/api/v1/destination", authenticateUser, destinationRouter); // Authenticate all routes for jobs
+  // CRUD for Expenses
+  app.use("/api/v1/expenses", expenseRouter);
 }

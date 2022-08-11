@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import { StatusCodes } from "http-status-codes";
-import { BadRequestError, UnauthenticatedError } from "../errors";
+import { BadRequestError } from "../errors";
 import { createUser } from "../services/user.services";
 import { omit } from "lodash";
 
@@ -12,7 +12,6 @@ const createNewUser = async (req: Request, res: Response) => {
   }
 
   //   Hashing the Password - handled as 'pre' inside of the user schema (User model file)
-
   const user = await createUser({ ...req.body });
 
   res
