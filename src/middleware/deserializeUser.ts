@@ -1,9 +1,15 @@
+// External
 import { get } from "lodash";
 import { Request, Response, NextFunction } from "express";
+// Config
 import { decode } from "../utils/jwt.utils";
 import { reIssueAccessToken } from "../services/session.services";
 import log from "../logger";
 
+/**
+ * @function deserializeUser middleware - adds user data to request headers
+ * @returns next function - middleware
+ */
 const deserializeUser = async (
   req: Request,
   res: Response,

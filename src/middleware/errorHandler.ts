@@ -1,6 +1,13 @@
+// External
 import { NextFunction, Request, Response } from "express";
 import StatusCodes from "http-status-codes";
 
+/**
+ * @function errorHandlerMiddleware middleware for handling errors
+ * @returns next function - middleware
+ *
+ * @todo - check whether this actually works???
+ */
 const errorHandlerMiddleware = (
   err: any,
   req: Request,

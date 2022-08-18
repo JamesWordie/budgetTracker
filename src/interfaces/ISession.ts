@@ -1,3 +1,4 @@
+// Internal
 import { IUser } from "./exports.interfaces";
 
 export interface ISession {

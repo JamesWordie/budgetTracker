@@ -1,3 +1,4 @@
+// External
 import { Model } from "mongoose";
 
 export interface IUser {

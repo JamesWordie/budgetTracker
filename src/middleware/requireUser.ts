@@ -1,7 +1,12 @@
+// External
 import { get } from "lodash";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 
+/**
+ * @function requiresUser - middleware to confirm user attached to the headers
+ * @returns next function - middleware
+ */
 const requiresUser = async (
   req: Request,
   res: Response,

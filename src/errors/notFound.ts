@@ -1,6 +1,11 @@
+// External
 import StatusCodes from "http-status-codes";
+// Config
 import CustomAPIError from "./customApi";
 
+/**
+ * @class NotFoundError
+ */
 class NotFoundError extends CustomAPIError {
   statusCode: number;
   constructor(message: string) {
