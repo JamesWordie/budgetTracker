@@ -1,21 +1,32 @@
+// External
+import { FilterQuery, UpdateQuery } from "mongoose";
+import { omit, get } from "lodash";
+// Config
 import { ISession, ISessionAccess } from "../interfaces/ISession";
 import Session from "../models/session.model";
-import { signJWT, decode } from "../utils/jwt.utils";
 import { findUser } from "./user.services";
-import { omit, get } from "lodash";
-import User from "../models/user.model";
-import { IUser } from "../interfaces/exports.interfaces";
-import { FilterQuery, UpdateQuery } from "mongoose";
 import { BadRequestError } from "../errors";
+// Utilities
+import { signJWT, decode } from "../utils/jwt.utils";
 import log from "../logger";
 
-export const createSession = async (userId: string, userAgent: string) => {
-  const session = await Session.create({ user: userId, userAgent });
-
-  return session;
+/**
+ * @function createSession
+ * @param userId userId from the headers as stored by the access/refresh tokens
+ * @param userAgent where the request has come from, comes from request headers
+ * @returns the newly created session on the DB
+ */
+const createSession = async (userId: string, userAgent: string) => {
+  return await Session.create({ user: userId, userAgent });
 };
 
-export const createAccessToken = async ({ user, session }: ISessionAccess) => {
+/**
+ * @function createAccessToken
+ * @param {object} user - IUser object minus the password
+ * @param {object} session - ISession object
+ * @returns an access token generated from jsonwebtoken
+ */
+const createAccessToken = async ({ user, session }: ISessionAccess) => {
   const accessToken = await signJWT(
     { user, session: session._id },
     { expiresIn: process.env.JWT_ACCESS_EXPIRES }
@@ -24,22 +35,12 @@ export const createAccessToken = async ({ user, session }: ISessionAccess) => {
   return accessToken;
 };
 
-export const validateUser = async (
-  userProperties: Pick<IUser, "email" | "password">
-) => {
-  const { email, password } = userProperties;
-  const user = await User.findOne({ email });
-
-  if (!user) return false;
-
-  const isValid = await user.comparePassword(password);
-
-  if (!isValid) return false;
-
-  return omit(user.toJSON(), "password");
-};
-
-export const reIssueAccessToken = async ({
+/**
+ * @function reIssueAccessToken
+ * @param {object} refreshToken jwt of the refresh token
+ * @returns a new access token if the old one is expired
+ */
+const reIssueAccessToken = async ({
   refreshToken,
 }: {
   refreshToken: string;
@@ -64,7 +65,13 @@ export const reIssueAccessToken = async ({
   return accessToken;
 };
 
-export const updateSession = async (
+/**
+ * @function updateSession
+ * @param sessionId sessionId taken from the request headers
+ * @param update {object} Partial ISession to update the record
+ * @returns the current session object (from find, if require updated, will need to do a find after) or an error
+ */
+const updateSession = async (
   sessionId: Pick<ISession, "_id">,
   update: UpdateQuery<Partial<ISession>>
 ) => {
@@ -75,11 +82,24 @@ export const updateSession = async (
   }
 };
 
-export const findSessions = async (query: FilterQuery<ISession>) => {
+/**
+ * @function findSessions
+ * @param query FilterQuery of ISession to find all of the users sessions
+ * @returns an array of ISession objects
+ */
+const findSessions = async (query: FilterQuery<ISession>) => {
   try {
     return Session.find(query);
   } catch (error: any) {
     log.error(error);
     throw new BadRequestError(error.message);
   }
+};
+
+export {
+  createSession,
+  createAccessToken,
+  reIssueAccessToken,
+  updateSession,
+  findSessions,
 };

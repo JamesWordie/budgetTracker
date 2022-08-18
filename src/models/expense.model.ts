@@ -1,6 +1,12 @@
+// External
 import { Schema, model, Types } from "mongoose";
+// Config
 import { IExpense } from "../interfaces/IExpense";
 
+/**
+ * @class ExpenseSchema
+ * setup of the expense model
+ */
 const ExpenseSchema = new Schema(
   {
     name: {
@@ -44,6 +50,7 @@ const ExpenseSchema = new Schema(
     timestamps: true,
   }
 );
+
 const Expense = model<IExpense>("Expense", ExpenseSchema);
 
 export default Expense;

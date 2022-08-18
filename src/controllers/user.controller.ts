@@ -1,9 +1,17 @@
+// External
 import { Response, Request } from "express";
+import { omit } from "lodash";
 import { StatusCodes } from "http-status-codes";
+// Config
 import { BadRequestError } from "../errors";
 import { createUser } from "../services/user.services";
-import { omit } from "lodash";
 
+/**
+ * @function createNewUser - register a new user
+ * @returns the newly created user, omitting the password
+ *
+ * @todo - need to implement the access and refresh token here too???
+ */
 const createNewUser = async (req: Request, res: Response) => {
   // Optional as already got mongoose validators
   const { firstname, surname, email, password } = req.body;

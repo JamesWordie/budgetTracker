@@ -1,7 +1,12 @@
+// External
 import mongoose from "mongoose";
 import "dotenv/config";
+// Config
 import log from "../logger";
 
+/**
+ * @function connectDB - database connection
+ */
 const connectDB = () => {
   const dbUri = process.env.MONGO_URI!;
 

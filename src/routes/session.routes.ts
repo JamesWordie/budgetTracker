@@ -1,4 +1,6 @@
+// External
 import { Router } from "express";
+// Config
 import {
   getAllUserSessions,
   createUserSession,

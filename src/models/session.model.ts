@@ -1,6 +1,12 @@
+// External
 import { model, Schema } from "mongoose";
+// Config
 import { ISession } from "../interfaces/exports.interfaces";
 
+/**
+ * @class SessionSchema
+ * setup of the session model
+ */
 const SessionSchema = new Schema(
   {
     user: {

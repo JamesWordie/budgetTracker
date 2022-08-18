@@ -1,11 +1,19 @@
-import { get } from "lodash";
+// External
 import { FilterQuery, Types } from "mongoose";
+import { get } from "lodash";
+// Config
 import { BadRequestError } from "../errors";
 import { IExpense } from "../interfaces/IExpense";
-import { IUser } from "../interfaces/IUser";
-import log from "../logger";
 import Expense from "../models/expense.model";
+import { checkUser } from "./user.services";
+// Utilities
+import log from "../logger";
 
+/**
+ * @function findAllExpenses
+ * @param query partial IExpense with the query params
+ * @returns an array of IExpense objects
+ */
 const findAllExpenses = async (query: FilterQuery<IExpense>) => {
   try {
     return Expense.find(query);
@@ -15,6 +23,11 @@ const findAllExpenses = async (query: FilterQuery<IExpense>) => {
   }
 };
 
+/**
+ * @function findAnExpense
+ * @param query partial IExpense with the query params
+ * @returns a single IExpense object
+ */
 const findAnExpense = async (query: FilterQuery<IExpense>) => {
   try {
     return Expense.findOne(query);
@@ -26,13 +39,16 @@ const findAnExpense = async (query: FilterQuery<IExpense>) => {
   }
 };
 
+/**
+ * @function createAnExpense
+ * @param userId from the request headers
+ * @param input an IExpense object
+ * @returns the newly created IExpense object
+ */
 const createExpense = async (userId: Types.ObjectId, input: IExpense) => {
   const createdBy = get(input, "createdBy");
 
-  if (createdBy !== userId)
-    throw new BadRequestError(
-      "UserId of session does not match that on the request."
-    );
+  createdBy && checkUser(userId, createdBy);
 
   try {
     return await Expense.create(input);
@@ -42,6 +58,13 @@ const createExpense = async (userId: Types.ObjectId, input: IExpense) => {
   }
 };
 
+/**
+ * @function updateExpense
+ * @param expenseId from request params - mongoose ID of resource
+ * @param userId from the request headers
+ * @param update updated fields for the IExpense, Partial IExpense
+ * @returns the updated IExpense object
+ */
 const updateExpense = async (
   expenseId: string,
   userId: string | Types.ObjectId,
@@ -49,10 +72,7 @@ const updateExpense = async (
 ) => {
   const createdBy = get(update, "createdBy");
 
-  if (createdBy !== userId)
-    throw new BadRequestError(
-      "UserId of session does not match that on the request."
-    );
+  createdBy && checkUser(userId, createdBy);
 
   try {
     return await Expense.findByIdAndUpdate(expenseId, update);
@@ -62,6 +82,11 @@ const updateExpense = async (
   }
 };
 
+/**
+ * @function deleteExpense
+ * @param expenseId from request params - mongoose ID of resource
+ * @returns resource or BadRequestError
+ */
 const deleteExpense = async (expenseId: string | Pick<IExpense, "_id">) => {
   try {
     return await Expense.findByIdAndDelete(expenseId);
