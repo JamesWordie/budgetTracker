@@ -1,6 +1,7 @@
 // External
 import { NextFunction, Request, Response } from "express";
 import StatusCodes from "http-status-codes";
+import log from "../logger";
 
 /**
  * @function errorHandlerMiddleware middleware for handling errors
@@ -30,6 +31,7 @@ const errorHandlerMiddleware = (
 
   // Duplicate Error
   if (err.code && err.code === 11000) {
+    log.info("INSIDE THE ERROR HANDLER MIDDLEWARE");
     customError.msg = `Duplicate value entered for the ${Object.keys(
       err.keyValue
     )} field, ${Object.values(

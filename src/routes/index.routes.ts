@@ -4,6 +4,7 @@ import { Express, Request, Response } from "express";
 import userRouter from "./user.routes";
 import sessionRouter from "./session.routes";
 import expenseRouter from "./expense.routes";
+import categoryRouter from "./category.routes";
 
 export default function (app: Express) {
   // solely for the purpose of confirming the server is live/live site is up and running
@@ -19,4 +20,7 @@ export default function (app: Express) {
 
   // CRUD for Expenses
   app.use("/api/v1/expenses", expenseRouter);
+
+  // CRUD for Categories
+  app.use("/api/v1/categories", categoryRouter);
 }

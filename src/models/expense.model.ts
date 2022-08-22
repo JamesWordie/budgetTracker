@@ -1,7 +1,7 @@
 // External
 import { Schema, model, Types } from "mongoose";
 // Config
-import { IExpense } from "../interfaces/IExpense";
+import { IExpense } from "../interfaces/exports.interfaces";
 
 /**
  * @class ExpenseSchema

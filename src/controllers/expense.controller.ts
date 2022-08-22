@@ -70,7 +70,7 @@ const updateAnExpense = async (req: Request, res: Response) => {
     _id: expense!._id,
   });
 
-  return res.status(StatusCodes.OK).json({ updatedExpense });
+  return res.status(StatusCodes.OK).json({ expense: updatedExpense });
 };
 
 /**
