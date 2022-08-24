@@ -11,6 +11,8 @@ import {
   deleteExpense,
 } from "../services/expense.services";
 import log from "../logger";
+import { IExpenseSearch } from "../interfaces/exports.interfaces";
+import { BadRequestError } from "../errors";
 
 /**
  * @function getAllExpenses
@@ -20,11 +22,15 @@ import log from "../logger";
  */
 const getAllExpenses = async (req: Request, res: Response) => {
   const userId = get(req, "userData.user._id");
-
   const queryParams = req.query;
-  log.info(queryParams);
+  let expenses;
 
-  const expenses = await findAllExpenses({ createdBy: userId });
+  if (queryParams) {
+    const formatQuery = formatExpenseQuery(queryParams);
+    expenses = await findAllExpenses({ createdBy: userId, ...formatQuery });
+  } else {
+    expenses = await findAllExpenses({ createdBy: userId });
+  }
 
   return res.status(StatusCodes.OK).json({ expenses });
 };
@@ -83,6 +89,77 @@ const deleteAnExpense = async (req: Request, res: Response) => {
   await deleteExpense(expenseId);
 
   return res.sendStatus(StatusCodes.NO_CONTENT);
+};
+
+// Private Functions
+const formatExpenseQuery = (params?: any) => {
+  let queryObject: Partial<IExpenseSearch> = {};
+  const {
+    startDate,
+    endDate,
+    startValue,
+    endValue,
+    expenseName,
+    isIncome,
+    isSubscription,
+    subscriptionPeriod,
+  } = params!;
+
+  if (expenseName) {
+    queryObject = {
+      ...queryObject,
+      expenseName: new RegExp(expenseName, "gi"),
+    };
+  }
+
+  if (startDate || endDate) {
+    let today = new Date();
+    queryObject = {
+      ...queryObject,
+      createdAt: {
+        $gte: startDate
+          ? parseDate(startDate)
+          : new Date(2022, today.getMonth() - 1, today.getDate()),
+        $lte: endDate ? parseDate(endDate, true) : today,
+      },
+    };
+  }
+
+  if (startValue || endValue) {
+    queryObject = {
+      ...queryObject,
+      expenseValue: { $gte: startValue ?? 0, $lte: endValue ?? null },
+    };
+  }
+
+  if (isIncome) {
+    queryObject = { ...queryObject, isIncome };
+  }
+
+  if (isSubscription) {
+    queryObject = { ...queryObject, isSubscription };
+  }
+
+  if (subscriptionPeriod) {
+    queryObject = { ...queryObject, subscriptionPeriod };
+  }
+
+  log.info(queryObject);
+
+  return queryObject;
+};
+
+const parseDate = (date: string, endDate?: boolean) => {
+  const [year, month, day]: Array<string> = date.split("-");
+
+  if (!year || !month || !day)
+    throw new BadRequestError("Date format is incorrect, must be yyyy-mm-dd");
+
+  return new Date(
+    parseInt(year),
+    parseInt(month) - 1,
+    !endDate ? parseInt(day) : parseInt(day) + 1
+  );
 };
 
 export {

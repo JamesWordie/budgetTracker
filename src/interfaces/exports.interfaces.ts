@@ -1,5 +1,5 @@
 // Expense
-export { IExpense, SubscriptionPeriod } from "./IExpense";
+export { IExpense, SubscriptionPeriod, IExpenseSearch } from "./IExpense";
 
 // User
 export { IUser, IUserMethods, UserModel } from "./IUser";

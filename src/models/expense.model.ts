@@ -9,12 +9,12 @@ import { IExpense } from "../interfaces/exports.interfaces";
  */
 const ExpenseSchema = new Schema(
   {
-    name: {
+    expenseName: {
       type: String,
       required: [true, "Please provide a expense name"],
       trim: true,
     },
-    value: {
+    expenseValue: {
       type: Number,
       required: true,
     },

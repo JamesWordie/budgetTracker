@@ -2,8 +2,8 @@
 import { Types } from "mongoose";
 
 export interface IExpense {
-  name: string;
-  value: number;
+  expenseName: string;
+  expenseValue: number;
   createdBy: Types.ObjectId;
   isSubscription: boolean;
   subscriptionPeriod: SubscriptionPeriod | null;
@@ -13,6 +13,12 @@ export interface IExpense {
   _id: string;
   isIncome: boolean;
   category: [Types.ObjectId] | [];
+}
+
+export interface IExpenseSearch extends IExpense {
+  expenseValue: any;
+  createdAt: any;
+  expenseName: any;
 }
 
 export type SubscriptionPeriod =
