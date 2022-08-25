@@ -9,16 +9,16 @@ import {
   createExpense,
   updateExpense,
   deleteExpense,
+  formatExpenseQuery,
 } from "../services/expense.services";
 import log from "../logger";
-import { IExpenseSearch } from "../interfaces/exports.interfaces";
+import { ICategory, IExpenseSearch } from "../interfaces/exports.interfaces";
 import { BadRequestError } from "../errors";
+import { findAllCategories } from "../services/category.services";
 
 /**
  * @function getAllExpenses
  * @returns all expenses for a specific user
- *
- * @todo add query params into the request for complex filtering, eg date range, category, tags, etc.
  */
 const getAllExpenses = async (req: Request, res: Response) => {
   const userId = get(req, "userData.user._id");
@@ -54,8 +54,23 @@ const getAnExpense = async (req: Request, res: Response) => {
  */
 const createAnExpense = async (req: Request, res: Response) => {
   const userId = get(req, "userData.user._id");
+  let requestBody = req.body;
+  let categories: Array<ICategory | null> = [];
 
-  const expense = await createExpense(userId, req.body);
+  //   Check if any categories
+  if (requestBody?.category && requestBody.category.length > 0) {
+    let allCategories = await findAllCategories();
+
+    allCategories.filter(async (category: any) => {
+      if (requestBody.category.includes(category._id.toString())) {
+        categories.push(category);
+      }
+    });
+  }
+  // Set the category, as objects rather than just the id
+  requestBody.category = categories;
+
+  const expense = await createExpense(userId, requestBody);
 
   return res.status(StatusCodes.CREATED).json({ expense });
 };
@@ -89,77 +104,6 @@ const deleteAnExpense = async (req: Request, res: Response) => {
   await deleteExpense(expenseId);
 
   return res.sendStatus(StatusCodes.NO_CONTENT);
-};
-
-// Private Functions
-const formatExpenseQuery = (params?: any) => {
-  let queryObject: Partial<IExpenseSearch> = {};
-  const {
-    startDate,
-    endDate,
-    startValue,
-    endValue,
-    expenseName,
-    isIncome,
-    isSubscription,
-    subscriptionPeriod,
-  } = params!;
-
-  if (expenseName) {
-    queryObject = {
-      ...queryObject,
-      expenseName: new RegExp(expenseName, "gi"),
-    };
-  }
-
-  if (startDate || endDate) {
-    let today = new Date();
-    queryObject = {
-      ...queryObject,
-      createdAt: {
-        $gte: startDate
-          ? parseDate(startDate)
-          : new Date(2022, today.getMonth() - 1, today.getDate()),
-        $lte: endDate ? parseDate(endDate, true) : today,
-      },
-    };
-  }
-
-  if (startValue || endValue) {
-    queryObject = {
-      ...queryObject,
-      expenseValue: { $gte: startValue ?? 0, $lte: endValue ?? null },
-    };
-  }
-
-  if (isIncome) {
-    queryObject = { ...queryObject, isIncome };
-  }
-
-  if (isSubscription) {
-    queryObject = { ...queryObject, isSubscription };
-  }
-
-  if (subscriptionPeriod) {
-    queryObject = { ...queryObject, subscriptionPeriod };
-  }
-
-  log.info(queryObject);
-
-  return queryObject;
-};
-
-const parseDate = (date: string, endDate?: boolean) => {
-  const [year, month, day]: Array<string> = date.split("-");
-
-  if (!year || !month || !day)
-    throw new BadRequestError("Date format is incorrect, must be yyyy-mm-dd");
-
-  return new Date(
-    parseInt(year),
-    parseInt(month) - 1,
-    !endDate ? parseInt(day) : parseInt(day) + 1
-  );
 };
 
 export {

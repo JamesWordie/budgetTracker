@@ -3,7 +3,7 @@ import { FilterQuery, Types } from "mongoose";
 import { get } from "lodash";
 // Config
 import { BadRequestError } from "../errors";
-import { IExpense } from "../interfaces/IExpense";
+import { IExpense, IExpenseSearch } from "../interfaces/exports.interfaces";
 import Expense from "../models/expense.model";
 import { checkUser } from "./user.services";
 // Utilities
@@ -96,10 +96,81 @@ const deleteExpense = async (expenseId: string | Pick<IExpense, "_id">) => {
   }
 };
 
+const formatExpenseQuery = (params?: any) => {
+  let queryObject: Partial<IExpenseSearch> = {};
+  const {
+    startDate,
+    endDate,
+    startValue,
+    endValue,
+    expenseName,
+    isIncome,
+    isSubscription,
+    subscriptionPeriod,
+  } = params!;
+
+  if (expenseName) {
+    queryObject = {
+      ...queryObject,
+      expenseName: new RegExp(expenseName, "gi"),
+    };
+  }
+
+  if (startDate || endDate) {
+    let today = new Date();
+    queryObject = {
+      ...queryObject,
+      createdAt: {
+        $gte: startDate
+          ? parseDate(startDate)
+          : new Date(2022, today.getMonth() - 1, today.getDate()),
+        $lte: endDate ? parseDate(endDate, true) : today,
+      },
+    };
+  }
+
+  if (startValue || endValue) {
+    queryObject = {
+      ...queryObject,
+      expenseValue: { $gte: startValue ?? 0, $lte: endValue ?? null },
+    };
+  }
+
+  if (isIncome) {
+    queryObject = { ...queryObject, isIncome };
+  }
+
+  if (isSubscription) {
+    queryObject = { ...queryObject, isSubscription };
+  }
+
+  if (subscriptionPeriod) {
+    queryObject = { ...queryObject, subscriptionPeriod };
+  }
+
+  log.info(queryObject);
+
+  return queryObject;
+};
+
+const parseDate = (date: string, endDate?: boolean) => {
+  const [year, month, day]: Array<string> = date.split("-");
+
+  if (!year || !month || !day)
+    throw new BadRequestError("Date format is incorrect, must be yyyy-mm-dd");
+
+  return new Date(
+    parseInt(year),
+    parseInt(month) - 1,
+    !endDate ? parseInt(day) : parseInt(day) + 1
+  );
+};
+
 export {
   findAllExpenses,
   findAnExpense,
   createExpense,
   updateExpense,
   deleteExpense,
+  formatExpenseQuery,
 };

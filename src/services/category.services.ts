@@ -15,7 +15,7 @@ import log from "../logger";
  */
 const findAllCategories = async () => {
   try {
-    return Category.find();
+    return Category.find().lean();
   } catch (error: any) {
     log.error(error);
     throw new BadRequestError(error.message);
